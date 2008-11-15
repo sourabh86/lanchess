@@ -1,0 +1,13 @@
+E:\Sourabh\VS\csharp\chess\chess\obj\Debug\chess.exe
+E:\Sourabh\VS\csharp\chess\chess\obj\Debug\chess.pdb
+E:\Sourabh\VS\csharp\chess\chess\obj\Debug\ResolveAssemblyReference.cache
+E:\Sourabh\VS\csharp\chess\chess\obj\Debug\chess.MainForm.resources
+E:\Sourabh\VS\csharp\chess\chess\obj\Debug\chess.FormIP.resources
+E:\Sourabh\VS\csharp\chess\chess\obj\Debug\chess.Properties.Resources.resources
+E:\Sourabh\VS\csharp\chess\chess\obj\Debug\chess.csproj.GenerateResource.Cache
+E:\Sourabh\VS\csharp\chess\chess\bin\Debug\chess.exe
+E:\Sourabh\VS\csharp\chess\chess\bin\Debug\chess.pdb
+E:\Sourabh\VS\csharp\chess\chess\obj\Debug\WindowsFormsApplication1.Frmwelcome.resources
+E:\Sourabh\VS\csharp\chess\chess\obj\Debug\chess.TwoPlayer.resources
+E:\Sourabh\SVNREPO\lanchess\chess\obj\Debug\chess.exe
+E:\Sourabh\SVNREPO\lanchess\chess\obj\Debug\chess.pdb

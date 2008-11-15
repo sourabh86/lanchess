@@ -1,6 +1,6 @@
 namespace chess
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -863,7 +863,7 @@ namespace chess
             this.B7.TabIndex = 9;
             this.B7.TabStop = false;
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -934,7 +934,7 @@ namespace chess
             this.Controls.Add(this.A8);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "SouChess";
             this.TransparencyKey = System.Drawing.Color.WhiteSmoke;
             this.Load += new System.EventHandler(this.Form1_Load);

@@ -21,7 +21,7 @@ namespace chess
         {
             if (textBox1.Text != "")
             {
-                Form1 frm1 = new Form1(textBox1.Text);
+                MainForm frm1 = new MainForm(textBox1.Text);
                 frm1.Show();
                 this.Hide();
             }
@@ -34,7 +34,7 @@ namespace chess
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Form1 frm1 = new Form1(null);
+            MainForm frm1 = new MainForm(null);
             frm1.Show();
             this.Hide();
         }

@@ -6,34 +6,23 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Data.OleDb;
-using System.IO;
-using System.Net.Sockets;
-using System.Net;
 
 namespace chess
 {
-    public partial class Form1 : Form
+    public partial class TwoPlayer : Form
     {
         private OleDbConnection conn;
         private OleDbDataAdapter oda;
-        private DataSet ods = new DataSet();
+        private DataSet ods=new DataSet();
         private string bckcolor;
-        private PictureBox older, newer;
+        private PictureBox older,newer;
         private PictureBox bking, wking;
         string[] validMoves;
         private string n1, o1;
-        private TcpClient client;
-        private NetworkStream ons;
-        private StreamReader osr;
-        private StreamWriter osw;
-        private TcpListener listener;
-        private Socket socket;
-        private bool isclient = true;
-        private string serverIP;
         public void calculaten1o1(PictureBox n, PictureBox o)
         {
             n1 = "Null";
-            if (n != null && n.Image != null)
+            if (n!=null && n.Image != null)
             {
                 n1 = n.ImageLocation.Trim("Objects/.jpg".ToCharArray());
                 n1 = n1.Remove(n1.Length - 1);
@@ -45,13 +34,15 @@ namespace chess
                 o1 = o1.Remove(o1.Length - 1);
             }
         }
-        public int TempMove(PictureBox n, PictureBox o, int color)
+        public int TempMove(PictureBox n, PictureBox o,int color)
         {
-            int result = color;
+            int result=color;
             if (!IsSameColor(n, o))
             {
                 calculaten1o1(n, o);
                 int gotiColor = int.Parse(o1.Remove(0, o1.Length - 1));
+                //(ods.Tables[0].Rows[int.Parse(newer.Name.Remove(0, newer.Name.Length - 1)) - 1][newer.Name.Remove(newer.Name.Length - 1, 1)]) = o1;
+                //(ods.Tables[0].Rows[int.Parse(older.Name.Remove(0, older.Name.Length - 1)) - 1][older.Name.Remove(older.Name.Length - 1, 1)]) = "Null";
                 bckcolor = (n.BackColor == Color.Black) ? "0" : "1";
                 string ntemp = n1;
                 n.Load("Objects/" + o1 + bckcolor + ".jpg");
@@ -60,26 +51,34 @@ namespace chess
                     bking = n;
                 if (o.ImageLocation.Contains("King1"))
                     wking = n;
+                //MessageBox.Show(gotiColor.ToString());
                 result = checksTheKing();
-                calculaten1o1(n, o);
-                if (n.ImageLocation.Contains("King0"))
-                    bking = o;
-                if (n.ImageLocation.Contains("King1"))
-                    wking = o;
-                string obckcolor = (o.BackColor == Color.Black) ? "0" : "1";
-                o.Load("Objects/" + n1 + obckcolor + ".jpg");
-                if (ntemp == "Null")
-                    n.Image = null;
-                else
-                    n.Load("Objects/" + ntemp + bckcolor + ".jpg");
+                //if (checkResult == gotiColor)
+                //{
+                    //SelectBox(older, newer);
+                    calculaten1o1(n, o);
+                    //(ods.Tables[0].Rows[int.Parse(newer.Name.Remove(0, newer.Name.Length - 1)) - 1][newer.Name.Remove(newer.Name.Length - 1, 1)]) = ntemp;
+                    //(ods.Tables[0].Rows[int.Parse(older.Name.Remove(0, older.Name.Length - 1)) - 1][older.Name.Remove(older.Name.Length - 1, 1)]) = n1;
+                    if (n.ImageLocation.Contains("King0"))
+                        bking = o;
+                    if (n.ImageLocation.Contains("King1"))
+                        wking = o;
+                    //bckcolor = (older.BackColor == Color.Black) ? "0" : "1";
+                    string obckcolor = (o.BackColor == Color.Black) ? "0" : "1";
+                    o.Load("Objects/" + n1 + obckcolor + ".jpg");
+                    if (ntemp == "Null")
+                        n.Image = null;
+                    else
+                        n.Load("Objects/" + ntemp + bckcolor + ".jpg");
+                //}
             }
             return result;
         }
-
+       
         public void checkTheCheckMate(int colorOfKing)
         {
             PictureBox king = colorOfKing == 1 ? wking : bking;
-            bool gameOver = true;
+            bool gameOver=true;
             foreach (PictureBox p in this.Controls)
             {
                 if (IsSameColor(p, king))
@@ -88,7 +87,7 @@ namespace chess
                     foreach (string box in validMoves)
                     {
                         //MessageBox.Show(box);
-                        if (box != null && TempMove(((PictureBox)this.Controls[box]), p, colorOfKing) != colorOfKing)
+                        if (box!=null && TempMove(((PictureBox)this.Controls[box]),p,colorOfKing) != colorOfKing)
                             gameOver = false;
                     }
                 }
@@ -96,15 +95,15 @@ namespace chess
             if (gameOver)
             {
                 MessageBox.Show("Check Mate!!!");
-                osw.WriteLine("Check Mate");
-                Application.Exit();
+                
+                //Application.Exit();
             }
         }
         public int checksTheKing()
         {
             foreach (PictureBox p in this.Controls)
             {
-                if (p.Image != null)
+                if(p.Image!=null)
                 {
                     FindAllValidMoves(p);
                     foreach (string box in validMoves)
@@ -137,25 +136,25 @@ namespace chess
         }
         public string FindOppColor(PictureBox o)
         {
-            calculaten1o1(null, o);
+            calculaten1o1(null,o);
             foreach (DataRow r in ods.Tables[0].Rows)
             {
                 foreach (DataColumn c in ods.Tables[0].Columns)
                 {
                     if (c.Caption != "ID" && r[c].ToString() != "Null" && r[c].ToString().Remove(0, r[c].ToString().Length - 1) != o1.Remove(0, o1.Length - 1))
-                        return (c.Caption + r["ID"].ToString());
+                        return (c.Caption+r["ID"].ToString());
                 }
             }
             return "Null";
         }
         public void FindAllValidMoves(PictureBox o)
         {
-            calculaten1o1(null, o);
+            calculaten1o1(null,o);
             //bool result = true;
             bool tocontinue = false;
             char col = Convert.ToChar(o.Name.Remove(1, 1)), less, gr;
             int ro = int.Parse(o.Name.Remove(0, 1));
-            int gotiColor = int.Parse(o1.Remove(0, o1.Length - 1)), startro, toAdd = 1, i = 0;
+            int gotiColor = int.Parse(o1.Remove(0, o1.Length - 1)), startro, toAdd = 1,i=0;
             switch (o1.Remove(o1.Length - 1, 1))
             {
                 case "Ghoda":
@@ -185,7 +184,7 @@ namespace chess
                             while (less < gr)
                             {
                                 if (((PictureBox)this.Controls[less.ToString() + ro.ToString()]).Image != null)
-                                    tocontinue = true;
+                                    tocontinue=true;
                                 less++;
                             }
                             if (tocontinue)
@@ -199,7 +198,7 @@ namespace chess
                             while (lessi < gri)
                             {
                                 if (((PictureBox)this.Controls[col.ToString() + lessi.ToString()]).Image != null)
-                                    tocontinue = true;
+                                    tocontinue=true;
                                 lessi++;
                             }
                             if (tocontinue)
@@ -222,7 +221,7 @@ namespace chess
                             //Pehli baar mein 2 kadam chal sakta hai....
                             if ((Math.Abs(col - Convert.ToChar(n.Name.Remove(1, 1))) == 0))
                             {
-                                if (n.Image == null && (Math.Abs((int.Parse(n.Name.Remove(0, 1)) - ro)) == 2) && ((gotiColor == 0 && ro == 2) || (gotiColor == 1 && ro == 7)))
+                                if (n.Image==null&&(Math.Abs((int.Parse(n.Name.Remove(0, 1)) - ro)) == 2) && ((gotiColor == 0 && ro == 2) || (gotiColor == 1 && ro == 7)))
                                 {
                                     validMoves[i] = n.Name;
                                     i++;
@@ -251,7 +250,7 @@ namespace chess
 
                     break;
                 case "Vazeer":
-                    validMoves = new string[28];
+                    validMoves=new string[28];
                     foreach (PictureBox n in this.Controls)
                     {
                         tocontinue = false;
@@ -268,7 +267,7 @@ namespace chess
                                 while (less < gr)
                                 {
                                     if (((PictureBox)this.Controls[less.ToString() + ro.ToString()]).Image != null)
-                                        tocontinue = true;
+                                        tocontinue=true;
                                     less++;
                                 }
                                 if (tocontinue)
@@ -282,7 +281,7 @@ namespace chess
                                 while (lessi < gri)
                                 {
                                     if (((PictureBox)this.Controls[col.ToString() + lessi.ToString()]).Image != null)
-                                        tocontinue = true;
+                                        tocontinue = true ;
                                     lessi++;
                                 }
                                 if (tocontinue)
@@ -316,7 +315,7 @@ namespace chess
                             while (less < gr)
                             {
                                 if (((PictureBox)this.Controls[less.ToString() + startro.ToString()]).Image != null)
-                                    tocontinue = true;
+                                    tocontinue=true;
                                 less++;
                                 startro += toAdd;
                             }
@@ -356,7 +355,7 @@ namespace chess
                         while (less < gr)
                         {
                             if (((PictureBox)this.Controls[less.ToString() + startro.ToString()]).Image != null)
-                                tocontinue = true;
+                                tocontinue=true;
                             less++;
                             startro += toAdd;
                         }
@@ -372,31 +371,31 @@ namespace chess
         public bool IsValidMove(PictureBox n, PictureBox o)
         {
             //calculaten1o1(n,o);
-            bool result = false;
+            bool result=false;
             FindAllValidMoves(o);
             foreach (string box in validMoves)
             {
                 if (n.Name == box)
                     return true;
             }
-
+            
             //MessageBox.Show("false return");
             return result;
         }
         public bool IsSameColor(PictureBox n, PictureBox o)
         {
-            calculaten1o1(n, o);
-            if (n1.Remove(0, n1.Length - 1) == o1.Remove(0, o1.Length - 1) && n1 != "Null")
+            calculaten1o1(n,o);
+            if(n1.Remove(0,n1.Length-1)==o1.Remove(0,o1.Length-1)&&n1!="Null") 
                 return true;
             else
                 return false;
         }
 
-        public Form1(string ip)
+        public TwoPlayer()
         {
-            serverIP = ip;
+            this.FormClosed += new FormClosedEventHandler(TwoPlayer_FormClosed);
             InitializeComponent();
-            conn = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + Application.StartupPath + "/chess.mdb");
+            conn=new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source="+Application.StartupPath+"/chess.mdb");
             conn.Open();
             oda = new OleDbDataAdapter("Select * from Table1", conn);
             oda.Fill(ods, "Table1");
@@ -406,17 +405,23 @@ namespace chess
             E7.Left += 2;
             E7.Top += 2;
             E7.Width -= 4;
-            E7.Height -= 4;
+            E7.Height-=4;
+        }
+
+        void TwoPlayer_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            //throw new NotImplementedException();
+            Application.Exit();
         }
 
         void Form1_Click(object sender, EventArgs e)
         {
             char s = 'A';
-            int x = ((((MouseEventArgs)e).X) / 90) + 1;
-            for (int i = 0; i < x - 1; i++)
+            int x=((((MouseEventArgs)e).X)/90)+1;
+            for (int i = 0; i < x-1; i++)
                 s++;
             int y = ((((MouseEventArgs)e).Y) / 90) + 1;
-            newer = ((PictureBox)this.Controls[s.ToString() + y.ToString()]);
+            newer=((PictureBox)this.Controls[s.ToString() + y.ToString()]);
             if (IsValidMove(newer, older) && !IsSameColor(newer, older))
             {
                 calculaten1o1(newer, older);
@@ -425,18 +430,18 @@ namespace chess
                 (ods.Tables[0].Rows[int.Parse(older.Name.Remove(0, older.Name.Length - 1)) - 1][older.Name.Remove(older.Name.Length - 1, 1)]) = "Null";
                 bckcolor = (newer.BackColor == Color.Black) ? "0" : "1";
                 string ntemp = n1;
-                newer.Load("Objects/" + o1 + bckcolor + ".jpg");
+                newer.Load("Objects/" + o1 + bckcolor+".jpg");
                 older.Image = null;
                 if (older.ImageLocation.Contains("King0"))
                     bking = newer;
                 if (older.ImageLocation.Contains("King1"))
                     wking = newer;
                 //MessageBox.Show(gotiColor.ToString());
-                int checkResult = checksTheKing();
+                int checkResult=checksTheKing();
                 if (checkResult == gotiColor)
                 {
                     //SelectBox(older, newer);
-                    calculaten1o1(newer, older);
+                    calculaten1o1(newer,older);
                     (ods.Tables[0].Rows[int.Parse(newer.Name.Remove(0, newer.Name.Length - 1)) - 1][newer.Name.Remove(newer.Name.Length - 1, 1)]) = ntemp;
                     (ods.Tables[0].Rows[int.Parse(older.Name.Remove(0, older.Name.Length - 1)) - 1][older.Name.Remove(older.Name.Length - 1, 1)]) = n1;
                     if (newer.ImageLocation.Contains("King0"))
@@ -453,112 +458,15 @@ namespace chess
                 }
                 else
                 {
-                    /*newer = ((PictureBox)this.Controls[FindOppColor(older)]);
                     SelectBox(newer, older);
-                    older = newer;*/
+                    older = newer;                    
+                    newer = ((PictureBox)this.Controls[FindOppColor(older)]);
+                    SelectBox(newer, older);
+                    older = newer;
                     if (checkResult != 10)
                     {
                         checkTheCheckMate(checkResult);
                     }
-                    string fline, line;
-                    try
-                    {
-                        if (isclient)
-                        {
-                            this.Enabled = false;
-                            osw.WriteLine(newer.Name);
-                            osw.Flush();
-                            osw.WriteLine(older.Name);
-                            osw.Flush();
-                            osw.WriteLine(bking.Name);
-                            osw.Flush();
-                            osw.WriteLine(wking.Name);
-                            osw.Flush();
-                            SelectBox(newer, older);
-                            older = newer;
-                            SelectBox(newer, older);
-                            older = newer;
-                            fline = osr.ReadLine();
-                            if (fline == "Check Mate")
-                            {
-                                throw(new Exception("Check Mate"));                                
-                            }
-                            //MessageBox.Show(fline);
-                            line = osr.ReadLine();
-                            //MessageBox.Show(line);
-                            calculaten1o1(((PictureBox)this.Controls[fline]), ((PictureBox)this.Controls[line]));
-                            (ods.Tables[0].Rows[int.Parse(fline.Remove(0, fline.Length - 1)) - 1][fline.Remove(fline.Length - 1, 1)]) = n1;
-                            (ods.Tables[0].Rows[int.Parse(line.Remove(0, line.Length - 1)) - 1][line.Remove(line.Length - 1, 1)]) = "Null";
-                            bckcolor = (((PictureBox)this.Controls[fline]).BackColor == Color.Black) ? "0" : "1";
-                            ((PictureBox)this.Controls[fline]).Load("Objects/" + o1 + bckcolor + ".jpg");
-                            ((PictureBox)this.Controls[line]).Image = null;
-                            line = osr.ReadLine();
-                            //MessageBox.Show(line);
-                            bking = ((PictureBox)this.Controls[line]);
-                            line = osr.ReadLine();
-                            //MessageBox.Show(line);
-                            wking = ((PictureBox)this.Controls[line]);
-                            if (((PictureBox)this.Controls[fline]) == older)
-                            {
-                                newer = ((PictureBox)this.Controls[FindOppColor(older)]);
-                                SelectBox(newer, older);
-                                older = newer;
-                            }
-                            this.Enabled = true;
-                        }
-                        else
-                        {
-                            this.Enabled = false;
-                            if (socket.Connected)
-                            {
-                                osw.WriteLine(newer.Name);
-                                osw.Flush();
-                                osw.WriteLine(older.Name);
-                                osw.Flush();
-                                osw.WriteLine(bking.Name);
-                                osw.Flush();
-                                osw.WriteLine(wking.Name);
-                                osw.Flush();
-                                SelectBox(newer, older);
-                                older = newer;
-                                fline = osr.ReadLine();
-                                if (fline == "Check Mate")
-                                {
-                                    throw (new Exception("Check Mate"));
-                                }
-                                //MessageBox.Show(fline);
-                                line = osr.ReadLine();
-                                //MessageBox.Show(line);
-                                calculaten1o1(((PictureBox)this.Controls[fline]), ((PictureBox)this.Controls[line]));
-                                (ods.Tables[0].Rows[int.Parse(fline.Remove(0, fline.Length - 1)) - 1][fline.Remove(fline.Length - 1, 1)]) = n1;
-                                (ods.Tables[0].Rows[int.Parse(line.Remove(0, line.Length - 1)) - 1][line.Remove(line.Length - 1, 1)]) = "Null";
-                                bckcolor = (((PictureBox)this.Controls[fline]).BackColor == Color.Black) ? "0" : "1";
-                                ((PictureBox)this.Controls[fline]).Load("Objects/" + o1 + bckcolor + ".jpg");
-                                ((PictureBox)this.Controls[line]).Image = null;
-                                line = osr.ReadLine();
-                                //MessageBox.Show(line);
-                                bking = ((PictureBox)this.Controls[line]);
-                                line = osr.ReadLine();
-                                //MessageBox.Show(line);
-                                wking = ((PictureBox)this.Controls[line]);
-                                if (((PictureBox)this.Controls[fline]) == older)
-                                {
-                                    newer = ((PictureBox)this.Controls[FindOppColor(older)]);
-                                    SelectBox(newer, older);
-                                    older = newer;
-                                }
-                                this.Enabled = true;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message);
-                        this.Enabled = true;
-                        if (ex.Message == "Check Mate")
-                            Application.Exit();
-                    }
-                    
                 }
             }
             if (IsSameColor(newer, older))
@@ -573,8 +481,7 @@ namespace chess
             base.OnPaint(e);
             Graphics gc = e.Graphics;
             Pen redpen = new Pen(Color.Red, 5);
-            if (older != null)
-                gc.DrawRectangle(redpen, older.Left, older.Top, older.Width, older.Height);
+            gc.DrawRectangle(redpen, older.Left, older.Top, older.Width, older.Height);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -587,69 +494,11 @@ namespace chess
                 {
                     if ((ods.Tables[0].Rows[i - 1][s.ToString()]).ToString() != "Null")
                     {
-                        bckcolor = (this.Controls[s.ToString() + i.ToString()].BackColor == Color.Black) ? "0" : "1";
-                        ((PictureBox)this.Controls[s.ToString() + i.ToString()]).Load("Objects/" + ods.Tables[0].Rows[i - 1][s.ToString()] + bckcolor + ".jpg");
+                        bckcolor= (this.Controls[s.ToString() + i.ToString()].BackColor == Color.Black)? "0": "1";
+                        ((PictureBox)this.Controls[s.ToString() + i.ToString()]).Load("Objects/" + ods.Tables[0].Rows[i - 1][s.ToString()]+bckcolor+".jpg");
                     }
                 }
                 s++;
-            }
-            try
-            {
-                client = new TcpClient(serverIP, 1234);
-                ons = client.GetStream();
-                osr = new StreamReader(ons);
-                osw = new StreamWriter(ons);
-            }
-            catch (Exception ex)
-            {
-                if(serverIP!=null)
-                MessageBox.Show("No Active Server Present.Attempting to create server");
-                isclient = false;
-                this.Text += "-Server";
-                try
-                {
-                    
-                    listener = new TcpListener(1234);
-                    
-                    listener.Start();
-                    //IPAddress[] ipad=Dns.GetHostAddresses(Dns.GetHostName());
-                    IPHostEntry ipEntry = Dns.GetHostByName(Dns.GetHostName());
-                    IPAddress[] addr = ipEntry.AddressList;
-                    foreach(IPAddress ip in addr)
-                    MessageBox.Show("Server Created with IP:" + ip.ToString());
-                    socket = listener.AcceptSocket();
-                    ons = new NetworkStream(socket);
-                    osr = new StreamReader(ons);
-                    osw = new StreamWriter(ons);
-                    if (socket.Connected)
-                        MessageBox.Show("Connected");
-                    osw.Flush();
-                }
-                catch (Exception ext)
-                {
-                    MessageBox.Show(ext.Message);
-                }
-            }
-            if (isclient)
-            {
-                SelectBox(E2, older);
-                older = E2;
-                string fline = osr.ReadLine();
-                //MessageBox.Show(fline);
-                string line = osr.ReadLine();
-                //MessageBox.Show(line);
-                calculaten1o1(((PictureBox)this.Controls[fline]), ((PictureBox)this.Controls[line]));
-                (ods.Tables[0].Rows[int.Parse(fline.Remove(0, fline.Length - 1)) - 1][fline.Remove(fline.Length - 1, 1)]) = n1;
-                (ods.Tables[0].Rows[int.Parse(line.Remove(0, line.Length - 1)) - 1][line.Remove(line.Length - 1, 1)]) = "Null";
-                bckcolor = (((PictureBox)this.Controls[fline]).BackColor == Color.Black) ? "0" : "1";
-                ((PictureBox)this.Controls[fline]).Load("Objects/" + o1 + bckcolor + ".jpg");
-                ((PictureBox)this.Controls[line]).Image = null;
-                line = osr.ReadLine();
-                //MessageBox.Show(line);
-                bking = ((PictureBox)this.Controls[line]);
-                line = osr.ReadLine();
-                //MessageBox.Show(line);
-                wking = ((PictureBox)this.Controls[line]);
             }
         }
     }

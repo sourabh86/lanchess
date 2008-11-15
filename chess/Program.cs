@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-
+using WindowsFormsApplication1;
 namespace chess
 {
     static class Program
@@ -14,7 +14,7 @@ namespace chess
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormIP());
+            Application.Run(new Frmwelcome());
         }
     }
 }
