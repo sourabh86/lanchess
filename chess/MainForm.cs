@@ -26,6 +26,7 @@ namespace chess
         void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             //osw.WriteLine("Exit");
+            comfun.exitapp();
             Application.Exit();
         }
 

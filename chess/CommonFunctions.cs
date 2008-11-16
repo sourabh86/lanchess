@@ -9,6 +9,7 @@ using System.Data;
 using System.IO;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading;
 
 namespace chess
 {
@@ -27,15 +28,14 @@ namespace chess
         private StreamWriter osw;
         private TcpListener listener;
         private Socket socket;
-        private bool isclient = true;
+        private bool isclient = true, networkingOn = false, formisclickable = true;
         private string serverIP;
         private Form callingForm;
-        private bool networkingOn=false;
-        public CFunc(Form cf,string ip,bool networkBool)
+        public CFunc(Form caller,string ip,bool networkBool)
         {
             serverIP = ip;
             networkingOn = networkBool;
-            callingForm = cf;
+            callingForm = caller;
             conn = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + Application.StartupPath + "/chess.mdb");
             conn.Open();
             oda = new OleDbDataAdapter("Select * from Table1", conn);
@@ -84,14 +84,11 @@ namespace chess
                     bking = o;
                 if (n.ImageLocation.Contains("King1"))
                     wking = o;
-                //string obckcolor = (o.BackColor == Color.Black) ? "0" : "1";
-                //o.Load("Objects/" + n1 + obckcolor + ".jpg");
                 o.Load("Objects/" + n1 + ".png");
                 if (ntemp == "Null")
                     n.Image = null;
                 else
-                    //n.Load("Objects/" + ntemp + bckcolor + ".jpg");
-                    n.Load("Objects/" + ntemp + ".png");
+                   n.Load("Objects/" + ntemp + ".png");
 
             }
             return result;
@@ -171,7 +168,6 @@ namespace chess
         public void FindAllValidMoves(PictureBox o)
         {
             calculaten1o1(null, o);
-            //bool result = true;
             bool tocontinue = false;
             char col = Convert.ToChar(o.Name.Remove(1, 1)), less, gr;
             int ro = int.Parse(o.Name.Remove(0, 1));
@@ -414,113 +410,64 @@ namespace chess
 
         public void mainFormClick(char s,int y)
         {
-            newer = ((PictureBox)callingForm.Controls[s.ToString() + y.ToString()]);
-            if (!IsSameColor(newer, older) && IsValidMove(newer, older))
+            if (formisclickable)
             {
-                calculaten1o1(newer, older);
-                int gotiColor = int.Parse(o1.Remove(0, o1.Length - 1));
-                (ods.Tables[0].Rows[int.Parse(newer.Name.Remove(0, newer.Name.Length - 1)) - 1][newer.Name.Remove(newer.Name.Length - 1, 1)]) = o1;
-                (ods.Tables[0].Rows[int.Parse(older.Name.Remove(0, older.Name.Length - 1)) - 1][older.Name.Remove(older.Name.Length - 1, 1)]) = "Null";
-                //bckcolor = (newer.BackColor == Color.Black) ? "0" : "1";
-                string ntemp = n1;
-                //newer.Load("Objects/" + o1 + bckcolor+".jpg");
-                newer.Load("Objects/" + o1 + ".png");
-                older.Image = null;
-                if (older.ImageLocation.Contains("King0"))
-                    bking = newer;
-                if (older.ImageLocation.Contains("King1"))
-                    wking = newer;
-                int checkResult = checksTheKing();
-                if (checkResult == gotiColor)
+                newer = ((PictureBox)callingForm.Controls[s.ToString() + y.ToString()]);
+                if (!IsSameColor(newer, older) && IsValidMove(newer, older))
                 {
                     calculaten1o1(newer, older);
-                    (ods.Tables[0].Rows[int.Parse(newer.Name.Remove(0, newer.Name.Length - 1)) - 1][newer.Name.Remove(newer.Name.Length - 1, 1)]) = ntemp;
-                    (ods.Tables[0].Rows[int.Parse(older.Name.Remove(0, older.Name.Length - 1)) - 1][older.Name.Remove(older.Name.Length - 1, 1)]) = n1;
-                    if (newer.ImageLocation.Contains("King0"))
-                        bking = older;
-                    if (newer.ImageLocation.Contains("King1"))
-                        wking = older;
-                    //bckcolor = (older.BackColor == Color.Black) ? "0" : "1";
-                    //string obckcolor = (older.BackColor == Color.Black) ? "0" : "1";
-                    //older.Load("Objects/" + n1 + obckcolor + ".jpg");
-                    older.Load("Objects/" + n1 + ".png");
-                    if (ntemp == "Null")
-                        newer.Image = null;
-                    else
-                        //newer.Load("Objects/" + ntemp + bckcolor + ".jpg");
-                        newer.Load("Objects/" + ntemp + ".png");
-                }
-                else
-                {
-                    if (!networkingOn)
+                    int gotiColor = int.Parse(o1.Remove(0, o1.Length - 1));
+                    (ods.Tables[0].Rows[int.Parse(newer.Name.Remove(0, newer.Name.Length - 1)) - 1][newer.Name.Remove(newer.Name.Length - 1, 1)]) = o1;
+                    (ods.Tables[0].Rows[int.Parse(older.Name.Remove(0, older.Name.Length - 1)) - 1][older.Name.Remove(older.Name.Length - 1, 1)]) = "Null";
+                    string ntemp = n1;
+                    newer.Load("Objects/" + o1 + ".png");
+                    older.Image = null;
+                    if (older.ImageLocation.Contains("King0"))
+                        bking = newer;
+                    if (older.ImageLocation.Contains("King1"))
+                        wking = newer;
+                    int checkResult = checksTheKing();
+                    if (checkResult == gotiColor)
                     {
-                        SelectBox(newer, older);
-                        older = newer;
-                        newer = ((PictureBox)callingForm.Controls[FindOppColor(older)]);
-                        SelectBox(newer, older);
-                        older = newer;
-                        if (checkResult != 10)
-                        {
-                            checkTheCheckMate(checkResult);
-                        }
+                        calculaten1o1(newer, older);
+                        (ods.Tables[0].Rows[int.Parse(newer.Name.Remove(0, newer.Name.Length - 1)) - 1][newer.Name.Remove(newer.Name.Length - 1, 1)]) = ntemp;
+                        (ods.Tables[0].Rows[int.Parse(older.Name.Remove(0, older.Name.Length - 1)) - 1][older.Name.Remove(older.Name.Length - 1, 1)]) = n1;
+                        if (newer.ImageLocation.Contains("King0"))
+                            bking = older;
+                        if (newer.ImageLocation.Contains("King1"))
+                            wking = older;
+                        older.Load("Objects/" + n1 + ".png");
+                        if (ntemp == "Null")
+                            newer.Image = null;
+                        else
+                            newer.Load("Objects/" + ntemp + ".png");
                     }
                     else
                     {
-                        if (checkResult != 10)
+                        if (!networkingOn)
                         {
-                            checkTheCheckMate(checkResult);
-                        }
-                        string fline, line;
-                        try
-                        {
-                            if (isclient)
+                            SelectBox(newer, older);
+                            older = newer;
+                            newer = ((PictureBox)callingForm.Controls[FindOppColor(older)]);
+                            SelectBox(newer, older);
+                            older = newer;
+                            if (checkResult != 10)
                             {
-                                callingForm.Enabled = false;
-                                osw.WriteLine(newer.Name);
-                                osw.Flush();
-                                osw.WriteLine(older.Name);
-                                osw.Flush();
-                                osw.WriteLine(bking.Name);
-                                osw.Flush();
-                                osw.WriteLine(wking.Name);
-                                osw.Flush();
-                                SelectBox(newer, older);
-                                older = newer;
-                                SelectBox(newer, older);
-                                older = newer;
-                                fline = osr.ReadLine();
-                                if (fline == "Check Mate")
-                                {
-                                    throw (new Exception("Check Mate"));
-                                }
-                                if (fline == "Exit")
-                                {
-                                    Application.Exit();
-                                }
-                                line = osr.ReadLine();
-                                calculaten1o1(((PictureBox)callingForm.Controls[fline]), ((PictureBox)callingForm.Controls[line]));
-                                (ods.Tables[0].Rows[int.Parse(fline.Remove(0, fline.Length - 1)) - 1][fline.Remove(fline.Length - 1, 1)]) = n1;
-                                (ods.Tables[0].Rows[int.Parse(line.Remove(0, line.Length - 1)) - 1][line.Remove(line.Length - 1, 1)]) = "Null";
-                                //bckcolor = (((PictureBox)this.Controls[fline]).BackColor == Color.Black) ? "0" : "1";
-                                ((PictureBox)callingForm.Controls[fline]).Load("Objects/" + o1 + ".png");
-                                ((PictureBox)callingForm.Controls[line]).Image = null;
-                                line = osr.ReadLine();
-                                bking = ((PictureBox)callingForm.Controls[line]);
-                                line = osr.ReadLine();
-                                wking = ((PictureBox)callingForm.Controls[line]);
-                                if (((PictureBox)callingForm.Controls[fline]) == older)
-                                {
-                                    newer = ((PictureBox)callingForm.Controls[FindOppColor(older)]);
-                                    SelectBox(newer, older);
-                                    older = newer;
-                                }
-                                callingForm.Enabled = true;
+                                checkTheCheckMate(checkResult);
                             }
-                            else
+                        }
+                        else
+                        {
+                            if (checkResult != 10)
                             {
-                                callingForm.Enabled = false;
-                                if (socket.Connected)
+                                checkTheCheckMate(checkResult);
+                            }
+                            string fline, line;
+                            try
+                            {
+                                if (isclient)
                                 {
+                                    formisclickable = true;
                                     osw.WriteLine(newer.Name);
                                     osw.Flush();
                                     osw.WriteLine(older.Name);
@@ -531,50 +478,124 @@ namespace chess
                                     osw.Flush();
                                     SelectBox(newer, older);
                                     older = newer;
-                                    fline = osr.ReadLine();
-                                    if (fline == "Check Mate")
+                                    SelectBox(newer, older);
+                                    older = newer;
+                                    Thread tcpClientThread = new Thread(delegate()
                                     {
-                                        throw (new Exception("Check Mate"));
-                                    }
-                                    if (fline == "Exit")
+                                        fline = osr.ReadLine();
+                                        if (fline == "Check Mate")
+                                        {
+                                            throw (new Exception("Check Mate"));
+                                        }
+                                        if (fline == "Exit")
+                                        {
+                                            exitapp();
+                                            Application.Exit();
+                                        }
+                                        line = osr.ReadLine();
+                                        calculaten1o1(((PictureBox)callingForm.Controls[fline]), ((PictureBox)callingForm.Controls[line]));
+                                        (ods.Tables[0].Rows[int.Parse(fline.Remove(0, fline.Length - 1)) - 1][fline.Remove(fline.Length - 1, 1)]) = n1;
+                                        (ods.Tables[0].Rows[int.Parse(line.Remove(0, line.Length - 1)) - 1][line.Remove(line.Length - 1, 1)]) = "Null";
+                                        ((PictureBox)callingForm.Controls[fline]).Load("Objects/" + o1 + ".png");
+                                        ((PictureBox)callingForm.Controls[line]).Image = null;
+                                        line = osr.ReadLine();
+                                        bking = ((PictureBox)callingForm.Controls[line]);
+                                        line = osr.ReadLine();
+                                        wking = ((PictureBox)callingForm.Controls[line]);
+                                        if (((PictureBox)callingForm.Controls[fline]) == older)
+                                        {
+                                            newer = ((PictureBox)callingForm.Controls[FindOppColor(older)]);
+                                            SelectBox(newer, older);
+                                            older = newer;
+                                        }
+                                        formisclickable = true;
+                                    });
+                                    tcpClientThread.Name = "Client Read";
+                                    tcpClientThread.Start();
+                                    
+                                }
+                                else
+                                {
+                                    formisclickable = false;
+                                    if (socket.Connected)
                                     {
-                                        Application.Exit();
-                                    }
-                                    line = osr.ReadLine();
-                                    calculaten1o1(((PictureBox)callingForm.Controls[fline]), ((PictureBox)callingForm.Controls[line]));
-                                    (ods.Tables[0].Rows[int.Parse(fline.Remove(0, fline.Length - 1)) - 1][fline.Remove(fline.Length - 1, 1)]) = n1;
-                                    (ods.Tables[0].Rows[int.Parse(line.Remove(0, line.Length - 1)) - 1][line.Remove(line.Length - 1, 1)]) = "Null";
-                                    //bckcolor = (((PictureBox)this.Controls[fline]).BackColor == Color.Black) ? "0" : "1";
-                                    ((PictureBox)callingForm.Controls[fline]).Load("Objects/" + o1 + ".png");
-                                    ((PictureBox)callingForm.Controls[line]).Image = null;
-                                    line = osr.ReadLine();
-                                    bking = ((PictureBox)callingForm.Controls[line]);
-                                    line = osr.ReadLine();
-                                    wking = ((PictureBox)callingForm.Controls[line]);
-                                    if (((PictureBox)callingForm.Controls[fline]) == older)
-                                    {
-                                        newer = ((PictureBox)callingForm.Controls[FindOppColor(older)]);
+                                        osw.WriteLine(newer.Name);
+                                        osw.Flush();
+                                        osw.WriteLine(older.Name);
+                                        osw.Flush();
+                                        osw.WriteLine(bking.Name);
+                                        osw.Flush();
+                                        osw.WriteLine(wking.Name);
+                                        osw.Flush();
                                         SelectBox(newer, older);
                                         older = newer;
+                                        Thread tcpServerThread = new Thread(delegate()
+                                        {
+                                            fline = osr.ReadLine();
+                                            if (fline == "Check Mate")
+                                            {
+                                                throw (new Exception("Check Mate"));
+                                            }
+                                            if (fline == "Exit")
+                                            {
+                                                exitapp();
+                                                Application.Exit();
+                                            }
+                                            line = osr.ReadLine();
+                                            calculaten1o1(((PictureBox)callingForm.Controls[fline]), ((PictureBox)callingForm.Controls[line]));
+                                            (ods.Tables[0].Rows[int.Parse(fline.Remove(0, fline.Length - 1)) - 1][fline.Remove(fline.Length - 1, 1)]) = n1;
+                                            (ods.Tables[0].Rows[int.Parse(line.Remove(0, line.Length - 1)) - 1][line.Remove(line.Length - 1, 1)]) = "Null";
+                                            ((PictureBox)callingForm.Controls[fline]).Load("Objects/" + o1 + ".png");
+                                            ((PictureBox)callingForm.Controls[line]).Image = null;
+                                            line = osr.ReadLine();
+                                            bking = ((PictureBox)callingForm.Controls[line]);
+                                            line = osr.ReadLine();
+                                            wking = ((PictureBox)callingForm.Controls[line]);
+                                            if (((PictureBox)callingForm.Controls[fline]) == older)
+                                            {
+                                                newer = ((PictureBox)callingForm.Controls[FindOppColor(older)]);
+                                                SelectBox(newer, older);
+                                                older = newer;
+                                            }
+                                            formisclickable = true;
+                                        });
+                                        tcpServerThread.Name = "Server Read";
+                                        tcpServerThread.Start();
                                     }
-                                    callingForm.Enabled = true;
                                 }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message);
-                            callingForm.Enabled = true;
-                            if (ex.Message == "Check Mate")
-                                Application.Exit();
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show(ex.Message);
+                                formisclickable = true;
+                                if (ex.Message == "Check Mate")
+                                    Application.Exit();
+                            }
                         }
                     }
                 }
+                if (IsSameColor(newer, older))
+                {
+                    SelectBox(newer, older);
+                    older = newer;
+                }
             }
-            if (IsSameColor(newer, older))
+        }
+        public void exitapp()
+        {
+            try
             {
-                SelectBox(newer, older);
-                older = newer;
+                if (networkingOn)
+                {
+                    osw.WriteLine("Exit");
+                    osr.Close();
+                    osw.Close();
+                    ons.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
         public void mainFormLoad()
@@ -587,8 +608,6 @@ namespace chess
                 {
                     if ((ods.Tables[0].Rows[i - 1][s.ToString()]).ToString() != "Null")
                     {
-                        //bckcolor= (this.Controls[s.ToString() + i.ToString()].BackColor == Color.Black)? "0": "1";
-                        //((PictureBox)this.Controls[s.ToString() + i.ToString()]).Load("Objects/" + ods.Tables[0].Rows[i - 1][s.ToString()]+bckcolor+".jpg");
                         ((PictureBox)callingForm.Controls[s.ToString() + i.ToString()]).Load("Objects/" + ods.Tables[0].Rows[i - 1][s.ToString()] + ".png");
                     }
                 }
@@ -604,63 +623,59 @@ namespace chess
                         ons = client.GetStream();
                         osr = new StreamReader(ons);
                         osw = new StreamWriter(ons);
+                        SelectBox(((PictureBox)callingForm.Controls["E2"]), older);
+                        older = ((PictureBox)callingForm.Controls["E2"]);
+                        Thread tcpClientThread = new Thread(delegate()
+                        {
+                            formisclickable = false;
+                            string fline = osr.ReadLine();
+                            string line = osr.ReadLine();
+                            calculaten1o1(((PictureBox)callingForm.Controls[fline]), ((PictureBox)callingForm.Controls[line]));
+                            (ods.Tables[0].Rows[int.Parse(fline.Remove(0, fline.Length - 1)) - 1][fline.Remove(fline.Length - 1, 1)]) = n1;
+                            (ods.Tables[0].Rows[int.Parse(line.Remove(0, line.Length - 1)) - 1][line.Remove(line.Length - 1, 1)]) = "Null";
+                            ((PictureBox)callingForm.Controls[fline]).Load("Objects/" + o1 + ".png");
+                            ((PictureBox)callingForm.Controls[line]).Image = null;
+                            line = osr.ReadLine();
+                            bking = ((PictureBox)callingForm.Controls[line]);
+                            line = osr.ReadLine();
+                            wking = ((PictureBox)callingForm.Controls[line]);
+                            formisclickable = true;
+                        });
+                        tcpClientThread.Name = "Client Load";
+                        tcpClientThread.Start();
                     }
                     else
                     {
                         isclient = false;
+                        callingForm.Text += "-Server";
+                        try
+                        {
+
+                            listener = new TcpListener(IPAddress.Any, 1234);
+                            listener.Start();
+                            IPHostEntry ipEntry = Dns.GetHostByName(Dns.GetHostName());
+                            IPAddress[] addr = ipEntry.AddressList;
+                            foreach(IPAddress ipa in addr)
+                                MessageBox.Show("Server Created with IP:" + ipa.ToString());
+                            socket = listener.AcceptSocket();
+                            ons = new NetworkStream(socket);
+                            osr = new StreamReader(ons);
+                            osw = new StreamWriter(ons);
+                            if (socket.Connected)
+                                MessageBox.Show("Connected");
+                            osw.Flush();
+                        }
+                        catch (Exception ext)
+                        {
+                            MessageBox.Show(ext.Message);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
-                    /*if (serverIP != null)
-                        MessageBox.Show("No Active Server Present.Attempting to create server");*/
                 }
-                if (isclient)
-                {
-                    SelectBox(((PictureBox)callingForm.Controls["E2"]), older);
-                    older = ((PictureBox)callingForm.Controls["E2"]);
-                    string fline = osr.ReadLine();
-                    string line = osr.ReadLine();
-                    calculaten1o1(((PictureBox)callingForm.Controls[fline]), ((PictureBox)callingForm.Controls[line]));
-                    (ods.Tables[0].Rows[int.Parse(fline.Remove(0, fline.Length - 1)) - 1][fline.Remove(fline.Length - 1, 1)]) = n1;
-                    (ods.Tables[0].Rows[int.Parse(line.Remove(0, line.Length - 1)) - 1][line.Remove(line.Length - 1, 1)]) = "Null";
-                    //bckcolor = (((PictureBox)this.Controls[fline]).BackColor == Color.Black) ? "0" : "1";
-                    ((PictureBox)callingForm.Controls[fline]).Load("Objects/" + o1 + ".png");
-                    ((PictureBox)callingForm.Controls[line]).Image = null;
-                    line = osr.ReadLine();
-                    bking = ((PictureBox)callingForm.Controls[line]);
-                    line = osr.ReadLine();
-                    wking = ((PictureBox)callingForm.Controls[line]);
-                }
-                else
-                {
-                    callingForm.Text += "-Server";
-                    try
-                    {
-
-                        listener = new TcpListener(IPAddress.Any, 1234);
-                        listener.Start();
-                        //IPAddress[] ipad=Dns.GetHostAddresses(Dns.GetHostName());
-                        //IPHostEntry ipEntry = Dns.GetHostByName(Dns.GetHostName());
-                        IPHostEntry ipEntry = Dns.GetHostEntry(Dns.GetHostName());
-                        IPAddress[] addr = ipEntry.AddressList;
-                        //MessageBox.Show("Server Created with name:" + ipEntry.HostName);
-                        //foreach (IPAddress ip in addr)
-                            MessageBox.Show("Server Created with IP:" + addr[2].ToString());
-                        socket = listener.AcceptSocket();
-                        ons = new NetworkStream(socket);
-                        osr = new StreamReader(ons);
-                        osw = new StreamWriter(ons);
-                        if (socket.Connected)
-                            MessageBox.Show("Connected");
-                        osw.Flush();
-                    }
-                    catch (Exception ext)
-                    {
-                        MessageBox.Show(ext.Message);
-                    }
-                }
+               
             }
         }
     }
