@@ -21,9 +21,21 @@ namespace chess
         {
             if (textBox1.Text != "")
             {
-                MainForm frm1 = new MainForm(textBox1.Text);
-                frm1.Show();
-                this.Hide();
+                IPAddress ipa = IPAddress.Parse("192.168.0.1");
+                if (IPAddress.TryParse(textBox1.Text, out ipa))
+                {
+                    MainForm frm1 = new MainForm(textBox1.Text, true);
+                    frm1.Show();
+                    this.Hide();
+                }
+                else
+                {
+                    MessageBox.Show("Please enter a valid IP-Address");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please Enter an IP Address");
             }
         }
 
@@ -34,9 +46,10 @@ namespace chess
 
         private void button2_Click(object sender, EventArgs e)
         {
-            MainForm frm1 = new MainForm(null);
+            MainForm frm1 = new MainForm("Server",true);
             frm1.Show();
             this.Hide();
         }
+        
     }
 }

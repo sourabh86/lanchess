@@ -5,9 +5,10 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using chess;
+//using chess;
 
-namespace WindowsFormsApplication1
+//namespace WindowsFormsApplication1
+namespace chess
 {
     public partial class Frmwelcome : Form
     {
@@ -18,7 +19,7 @@ namespace WindowsFormsApplication1
 
         private void button3_Click(object sender, EventArgs e)
         {
-            TwoPlayer tplyr = new TwoPlayer();
+            MainForm tplyr = new MainForm(null,false);
             tplyr.Show();
             this.Hide();
         }
@@ -29,5 +30,7 @@ namespace WindowsFormsApplication1
             frmip.Show();
             this.Hide();
         }
+
+       
     }
 }

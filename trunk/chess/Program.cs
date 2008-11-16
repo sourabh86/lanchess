@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using WindowsFormsApplication1;
+//using WindowsFormsApplication1;
 namespace chess
 {
     static class Program
