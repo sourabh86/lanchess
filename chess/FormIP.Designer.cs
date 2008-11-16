@@ -37,7 +37,7 @@ namespace chess
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 69);
+            this.button1.Location = new System.Drawing.Point(12, 66);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
@@ -47,7 +47,7 @@ namespace chess
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(102, 69);
+            this.button2.Location = new System.Drawing.Point(107, 66);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(81, 23);
             this.button2.TabIndex = 1;
@@ -57,7 +57,7 @@ namespace chess
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(204, 69);
+            this.button3.Location = new System.Drawing.Point(204, 66);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 2;
@@ -85,7 +85,7 @@ namespace chess
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(295, 109);
+            this.ClientSize = new System.Drawing.Size(295, 107);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button3);
